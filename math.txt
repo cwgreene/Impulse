@@ -1,0 +1,19 @@
+dVin/dt - dI/dt R = dVout/dt
+i = C*dVout/dt
+
+dVin/dt - C*dVout^2/dt^2 R = dVout/dt
+
+dVin/dt 
+
+x= Vin
+y= Vout
+
+x(t) - k*y''(t)  - y'(t) = 0
+
+ynext   = y + y'*dt  
+y'next  = y' + y''*dt
+y''now = x(t) - y'
+
+dVin - C*dVout = dVout
+
+at t = 0, i = 0 Vout=Vin,
