@@ -10,36 +10,36 @@ int print_vec(Vec3b v){
 }
 
 struct Circuit{
-    Mat_ *vin;
-    Mat_ Vout;
+    Mat_<Vec3b> *Vin;
+    Mat_<Vec3d> Vout;
+    Mat_<Vec3b> qVout;
 
-    double iR = 1 ; // Inverse Resistance
-    double iC = 1000*1000; // Inverse Capacitance
+    double iR; // Inverse Resistance
+    double iC; // Inverse Capacitance
 
-    Mat_ dVout;
+    Mat_<Vec3d> dVout;
 
-    double dt = 1./30;
+    double dt; 
 };
 
-void timeStep(Circuit &circuit){
-    double dt = circuit.dt;
-    double iR = circuit.iR;
-    double iC = circuit.iC;
-    for(int i = 0; i < circuit.Vin.rows; i++){
-        for(int j = 0; j < circuit.Vout.cols; j++){
-            for(int index = 0; i < 3;index++){
-                double _Vout = Vout(i,j)[index];
-                double _dVout = dVout(i,j)[index];
-                double _ddVout = (*Vin)(i,j)[index]-Vout(i,j)[index]*iC*iR;
+void timeStep(Circuit &c){
+    double dt = c.dt;
+    double iR = c.iR;
+    double iC = c.iC;
+    for(int i = 0; i < c.Vin->rows; i++){
+        for(int j = 0; j < c.Vin->cols; j++){
+            for(int index = 0; index < 3;index++){
+                double _Vout = c.Vout(i,j)[index];
+                double _dVout = c.dVout(i,j)[index];
+                double _ddVout = c.Vin->operator()(i,j)[index]-c.Vout(i,j)[index]*iC*iR;
     
-                Vout(i,j)[index] = _Vout+_dVout*dt;
-                dVout(i,j)[index] = _dVout+_ddVout*dt;
+                c.Vout(i,j)[index] = _Vout+_dVout*dt;
+                c.dVout(i,j)[index] = _dVout+_ddVout*dt;
+                c.qVout(i,j)[index] = _Vout;
             }
         }
     }
 }
-
-double colors
 
 int main(int argc, char **argv){
     if(argc < 2){
@@ -54,32 +54,22 @@ int main(int argc, char **argv){
    
     //Init Circuit 
     Circuit circuit;
-    cap >> frame; if(! frame.data) break;
+    cap >> frame; if(! frame.data) return -1;
     circuit.Vout = frame;
-    circuit.dVout = zeros(frame.rows,frame.cols);
+    circuit.qVout = frame;
+    circuit.dVout = Mat::zeros(frame.rows,frame.cols,CV_32F);
+    circuit.iR = 1000;
+    circuit.iC = 1000;
+    circuit.dt = .0001;
+    int frame_count = 0;
     for(;;){
-        cap >> frame; if(!frame.data) break;
-        if(prev_frame.data){
-            int count = 0;
-            for(int i = 0; i < frame.rows; i++){
-                for (int j = 0 ; j < frame.cols;j++){
-                    // What? The format seems to be BGR. :(
-                    // Endianess issue maybe?
-                    if(frame(i,j) == prev_frame(i,j))
-                        count +=1;
-                    for(int index = 0; i < 3;i++){
-                        if(frame(i,j)[0] != prev_frame(i,j)[0])
-                        {
-                            frame(i,j)[0]=0;
-                            frame(i,j)[1]=0;
-                            frame(i,j)[2]=0;
-                        }
-                   }
-                }
-            }
-            std::cout << count << std::endl;
-        }
-        imshow("video", frame); if(waitKey(30) >= 0) break;
-        prev_frame = frame;
+        std::cout <<frame_count<<std::endl;
+        frame_count++;
+        cap >> frame;
+        
+        circuit.Vin = &frame;
+        timeStep(circuit);
+
+        imshow("video", circuit.qVout); if(waitKey(30) >= 0) break;
     }
 }
