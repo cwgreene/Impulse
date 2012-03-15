@@ -67,14 +67,28 @@ void copyEach(Mat_<T> &a, Mat_<T2> &b, int n){
     }
 }
 
+void skipAhead(int n, VideoCapture &cap){
+    Mat_<Vec3b> m;
+    for(int i = 0; i < n; i+=100){
+        cap >> m;
+        if(i % 100 == 1){
+            std::cout << "'Skipping' " << i << std::endl;
+            imshow("video", m); if(waitKey(30) >= 0) break;
+        }
+    }
+}
+
 int main(int argc, char **argv){
     int reduce = 1;
+    int skip = 0;
     if(argc < 2){
         printf("usage: machinelearning MOVIE_FILE\n");
         return -1;
     }
     if(argc >= 3)
         reduce = atoi(argv[2]);
+    if(argc >= 4)
+        skip = atoi(argv[3]);
     VideoCapture cap;
     cap.open(argv[1]);
     Mat_<Vec3b> frame; 
@@ -100,9 +114,11 @@ int main(int argc, char **argv){
     circuit.Vin = Mat::zeros(frame.rows,frame.cols,CV_32F);
     circuit.Vin_prev = Mat::zeros(frame.rows,frame.cols,CV_32F);
 
-    //copyEach(frame,circuit.Vout,reduce);
+    skipAhead(skip, cap);
 
-    frame.copyTo(circuit.qVout);
+    copyEach(frame,circuit.qVout,reduce);
+
+    //frame.copyTo(circuit.qVout);
     //frame.copyTo(circuit.Vout);
     frame.copyTo(circuit.Vin);
     timeStep(circuit, reduce);
