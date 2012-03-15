@@ -8,11 +8,11 @@ dVin/dt
 x= Vin
 y= Vout
 
-x(t) - k*y''(t)  - y'(t) = 0
+x'(t) - k*y''(t)  - y'(t) = 0
 
 ynext   = y + y'*dt  
 y'next  = y' + y''*dt
-y''now = x(t) - y'
+y''now = (x'(t) - y')/k
 
 dVin - C*dVout = dVout
 
