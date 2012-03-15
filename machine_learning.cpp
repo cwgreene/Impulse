@@ -35,13 +35,18 @@ void timeStep(Circuit &c, int reduction){
             int j = jp/offset;
             for(int index = 0; index < 3;index++){
                 double _Vout = c.Vout(i,j)[index];
+                double _dVin = c.Vin(ip,jp)[index]-c.Vin_prev(ip,jp)[index];
+                /* Low Pass */
+                 
                 double _dVout = c.dVout(i,j)[index];
                 double _ddVout = ((c.Vin(ip,jp)[index]
                                     -c.Vin_prev(ip,jp)[index])
                                     -_dVout)*iR*iC/(dt*dt);
+                /* High Pass */
+//                double _dVout = _dVin-(c.iR*c.iC)*_dVout;
     
                 c.Vout(i,j)[index] = _Vout+_dVout*dt;
-                c.dVout(i,j)[index] = _dVout+_ddVout*dt;
+                c.dVout(i,j)[index] = _dVout + _ddVout*dt;
                 if(_Vout > 255)
                 {
                     c.qVout(i,j)[index] = 255;
@@ -99,8 +104,8 @@ int main(int argc, char **argv){
    
     //Init Circuit 
     Circuit circuit;
-    circuit.iR = 1.4;
-    circuit.iC = 1.4;
+    circuit.iR = 0.05;
+    circuit.iC = 1;
     circuit.dt = 1;
         //Get first frame
     int frame_count = 0;
