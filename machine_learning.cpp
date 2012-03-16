@@ -1,4 +1,5 @@
 #include <cv.h>
+#include <stdio.h>
 #include <highgui.h>
 #include <iostream>
 
