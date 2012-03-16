@@ -49,8 +49,6 @@ void lowPassTimeStep(Circuit &c, int reduction){
                 double _ddVout = ((c.Vin(ip,jp)[index]
                                     -c.Vin_prev(ip,jp)[index])
                                     -_dVout)*iR*iC/(dt*dt);
-                /* High Pass */
-//                double _dVout = _dVin-(c.iR*c.iC)*_dVout;
     
                 c.Vout(i,j)[index] = _Vout+_dVout*dt;
                 c.dVout(i,j)[index] = _dVout + _ddVout*dt;
