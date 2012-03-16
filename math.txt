@@ -1,3 +1,4 @@
+# Low Pass
 dVin/dt - dI/dt R = dVout/dt
 i = C*dVout/dt
 
@@ -17,3 +18,10 @@ y''now = (x'(t) - y')/k
 dVin - C*dVout = dVout
 
 at t = 0, i = 0 Vout=Vin,
+
+# High pass
+Vout = IR
+Vin - Q/C - IR = 0
+
+dVin/dt - I/C = dVout/dt
+dVout/dt = dVin/dt - (C/R) Vout
