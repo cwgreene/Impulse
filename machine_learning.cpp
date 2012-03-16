@@ -47,6 +47,7 @@ void timeStep(Circuit &c, int reduction){
     
                 c.Vout(i,j)[index] = _Vout+_dVout*dt;
                 c.dVout(i,j)[index] = _dVout + _ddVout*dt;
+                _Vout = c.Vin(ip,jp)[index]-c.qVout(i,j)[index];
                 if(_Vout > 255)
                 {
                     c.qVout(i,j)[index] = 255;
