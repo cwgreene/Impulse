@@ -3,64 +3,13 @@
 #include <highgui.h>
 #include <iostream>
 
+#include "filters.hpp"
+
 using namespace cv;
 
 int print_vec(Vec3b v){
     unsigned int a=v[0],b=v[0],c=v[0];
     std::cout << a << " " << b << " " << c << std::endl;
-}
-
-struct Circuit{
-    Mat_<Vec3b> Vin;
-    Mat_<Vec3b> Vin_prev;
-    
-    Mat_<Vec3d> Vout;
-    Mat_<Vec3d> dVout;
-    Mat_<Vec3b> qVout;
-
-    double iR; // Inverse Resistance
-    double iC; // Inverse Capacitance
-
-
-    double dt; 
-};
-
-void timeStep(Circuit &c, int reduction){
-    double dt = c.dt;
-    double iR = c.iR;
-    double iC = c.iC;
-    int offset = reduction;
-    for(int ip = 0; ip < c.Vin.rows; ip += offset){
-        for(int jp = 0; jp < c.Vin.cols; jp += offset){
-            int i = ip/offset;
-            int j = jp/offset;
-            for(int index = 0; index < 3;index++){
-                double _Vout = c.Vout(i,j)[index];
-                double _dVin = c.Vin(ip,jp)[index]-c.Vin_prev(ip,jp)[index];
-                /* Low Pass */
-                 
-                double _dVout = c.dVout(i,j)[index];
-                double _ddVout = ((c.Vin(ip,jp)[index]
-                                    -c.Vin_prev(ip,jp)[index])
-                                    -_dVout)*iR*iC/(dt*dt);
-                /* High Pass */
-//                double _dVout = _dVin-(c.iR*c.iC)*_dVout;
-    
-                c.Vout(i,j)[index] = _Vout+_dVout*dt;
-                c.dVout(i,j)[index] = _dVout + _ddVout*dt;
-                _Vout = c.Vin(ip,jp)[index]-c.qVout(i,j)[index];
-                if(_Vout > 255)
-                {
-                    c.qVout(i,j)[index] = 255;
-                }
-                else if(_Vout < 0){
-                    c.qVout(i,j)[index] = 0;
-                }
-                else
-                    c.qVout(i,j)[index] = _Vout;
-            }
-        }
-    }
 }
 
 template<class T,class T2>
@@ -107,7 +56,7 @@ int main(int argc, char **argv){
     //Init Circuit 
     Circuit circuit;
     circuit.iR = 0.05;
-    circuit.iC = 1;
+    circuit.iC = .4;
     circuit.dt = 1;
         //Get first frame
     int frame_count = 0;
@@ -128,7 +77,7 @@ int main(int argc, char **argv){
     //frame.copyTo(circuit.qVout);
     //frame.copyTo(circuit.Vout);
     frame.copyTo(circuit.Vin);
-    timeStep(circuit, reduce);
+    lowPassTimeStep(circuit, reduce);
 
     int peekx= 100;
     int peeky= 100;
@@ -144,7 +93,7 @@ int main(int argc, char **argv){
         
         frame.copyTo(circuit.Vin);
         std::cout << (int)frame(peekx,peeky)[1] << " ";
-        timeStep(circuit,reduce);
+        lowPassTimeStep(circuit,reduce);
         std::cout << (int)circuit.qVout(peekx,peeky)[1]
                   << '/' <<circuit.Vout(peekx,peeky)[1] 
                   << std::endl;
