@@ -1,5 +1,30 @@
 #include "filters.hpp"
 
+LowPass::LowPass(int rows, int cols, double iR, double iC, double dt, int reduce){
+    Vout = Mat::zeros(rows/reduce,cols/reduce,CV_32F); 
+    dVout = Mat::zeros(rows/reduce,cols/reduce,CV_32F);
+    qVout = Mat::zeros(rows/reduce,cols/reduce,CV_32F);
+    Vin = Mat::zeros(rows,cols,CV_32F);
+    Vin_prev = Mat::zeros(rows,cols,CV_32F);
+
+    this->iC = iC;
+    this->iR = iR;
+    this->dt = dt;
+};
+
+HighPass::HighPass(int rows, int cols, double iR, double iC, double dt, int reduce){
+    Vout = Mat::zeros(rows/reduce,cols/reduce,CV_32F); 
+    dVout = Mat::zeros(rows/reduce,cols/reduce,CV_32F); 
+    qVout = Mat::zeros(rows/reduce,cols/reduce,CV_32F);
+    Vin = Mat::zeros(rows,cols,CV_32F);
+    Vin_prev = Mat::zeros(rows,cols,CV_32F);
+
+    this->iC = iC;
+    this->iR = iR;
+    this->dt = dt;
+};
+
+
 void highPassTimeStep(Circuit &c, int reduction){
     double dt = c.dt;
     double iR = c.iR;
@@ -13,10 +38,10 @@ void highPassTimeStep(Circuit &c, int reduction){
                 double _Vout = c.Vout(i,j)[index];
                 double _dVin = c.Vin(ip,jp)[index]-c.Vin_prev(ip,jp)[index];
                 /* High Pass */
-                double _dVout = _dVin-(c.iR*c.iC)*_dVout;
+                double _dVout = _dVin-(c.iR*c.iC)*_Vout;
     
                 c.Vout(i,j)[index] = _Vout+_dVout*dt;
-                _Vout = c.Vin(ip,jp)[index]-c.qVout(i,j)[index];
+                _Vout = c.Vout(i,j)[index];//c.Vin(ip,jp)[index]-c.qVout(i,j)[index];
                 if(_Vout > 255)
                 {
                     c.qVout(i,j)[index] = 255;
@@ -25,7 +50,7 @@ void highPassTimeStep(Circuit &c, int reduction){
                     c.qVout(i,j)[index] = 0;
                 }
                 else
-                    c.qVout(i,j)[index] = _Vout;
+                    c.qVout(i,j)[index] = 255;
             }
         }
     }

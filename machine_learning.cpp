@@ -50,54 +50,48 @@ int main(int argc, char **argv){
     Mat_<Vec3b> frame; 
     Mat_<Vec3b> prev_frame; 
     namedWindow("video",1);
-
-
    
     //Init Circuit 
-    Circuit circuit;
-    circuit.iR = 0.05;
-    circuit.iC = .4;
-    circuit.dt = 1;
-        //Get first frame
+    //Get first frame
     int frame_count = 0;
     cap >> frame; if(! frame.data) return -1;
 
     //Initialize voltages to correct sizes
-
-    circuit.Vout = Mat::zeros(frame.rows/reduce,frame.cols/reduce,CV_32F); 
-    circuit.dVout = Mat::zeros(frame.rows/reduce,frame.cols/reduce,CV_32F);
-    circuit.qVout = Mat::zeros(frame.rows/reduce,frame.cols/reduce,CV_32F);
-    circuit.Vin = Mat::zeros(frame.rows,frame.cols,CV_32F);
-    circuit.Vin_prev = Mat::zeros(frame.rows,frame.cols,CV_32F);
+    LowPass circuit1(frame.rows,frame.cols,0.05,10.,1.0, reduce);
+    HighPass circuit2(frame.rows,frame.cols,0.05,2.0,1.0, reduce);
 
     skipAhead(skip, cap);
 
-    copyEach(frame,circuit.qVout,reduce);
+    copyEach(frame,circuit2.qVout,reduce);
 
     //frame.copyTo(circuit.qVout);
-    //frame.copyTo(circuit.Vout);
-    frame.copyTo(circuit.Vin);
-    lowPassTimeStep(circuit, reduce);
+    copyEach(frame,circuit2.Vin, 1);
+    highPassTimeStep(circuit2, reduce);
+    copyEach(circuit2.Vout,circuit1.Vin,reduce);
+    copyEach(circuit1.Vin,circuit1.Vin_prev,reduce);
 
     int peekx= 100;
     int peeky= 100;
 
-    std::cout << (int)circuit.qVout(peekx,peeky)[1]
-              << '/' <<circuit.Vout(peekx,peeky)[1] 
+    std::cout << (int)circuit1.qVout(peekx,peeky)[1]
+              << '/' <<circuit1.Vout(peekx,peeky)[1] 
               << std::endl;
     for(;;){
-        frame.copyTo(circuit.Vin_prev);
+        copyEach(frame,circuit2.Vin_prev, 1);
         std::cout <<frame_count<<" ";
         frame_count++;
         cap >> frame;
         
-        frame.copyTo(circuit.Vin);
         std::cout << (int)frame(peekx,peeky)[1] << " ";
-        lowPassTimeStep(circuit,reduce);
-        std::cout << (int)circuit.qVout(peekx,peeky)[1]
-                  << '/' <<circuit.Vout(peekx,peeky)[1] 
+        copyEach(frame,circuit2.Vin, 1);
+        highPassTimeStep(circuit2,reduce);
+        copyEach(circuit1.Vin,circuit1.Vin_prev, reduce);
+        copyEach(circuit2.Vout,circuit1.Vin, reduce);
+        lowPassTimeStep(circuit2,reduce);
+        std::cout << (int)circuit1.qVout(peekx,peeky)[1]
+                  << '/' <<circuit1.Vout(peekx,peeky)[1] 
                   << std::endl;
         if(frame_count %2)
-        imshow("video", circuit.qVout); if(waitKey(30) >= 0) break;
+        imshow("video", circuit2.qVout); if(waitKey(30) >= 0) break;
     }
 }

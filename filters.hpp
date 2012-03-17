@@ -6,8 +6,8 @@
 using namespace cv;
 
 struct Circuit{
-    Mat_<Vec3b> Vin;
-    Mat_<Vec3b> Vin_prev;
+    Mat_<Vec3d> Vin;
+    Mat_<Vec3d> Vin_prev;
     
     Mat_<Vec3d> Vout;
     Mat_<Vec3d> dVout;
@@ -18,6 +18,14 @@ struct Circuit{
 
 
     double dt; 
+};
+
+struct LowPass:Circuit{
+    LowPass(int rows,int cols, double iR, double iC, double dt, int reduce);
+};
+
+struct HighPass:Circuit{
+    HighPass(int rows,int cols, double iR, double iC, double dt, int reduce);
 };
 
 void highPassTimeStep(Circuit &c, int reduction);
