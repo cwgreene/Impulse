@@ -47,11 +47,11 @@ int main(int argc, char **argv){
         skip = atoi(argv[3]);
     VideoCapture cap;
     cap.open(argv[1]);
-    Mat_<Vec3b> frame; 
-    Mat_<Vec3b> prev_frame; 
+    Mat_<Vec3b> frame;
+    Mat_<Vec3b> prev_frame;
     namedWindow("video",1);
-   
-    //Init Circuit 
+
+    //Init Circuit
     //Get first frame
     int frame_count = 0;
     cap >> frame; if(! frame.data) return -1;
@@ -74,14 +74,14 @@ int main(int argc, char **argv){
     int peeky= 100;
 
     std::cout << (int)circuit1.qVout(peekx,peeky)[1]
-              << '/' <<circuit1.Vout(peekx,peeky)[1] 
+              << '/' <<circuit1.Vout(peekx,peeky)[1]
               << std::endl;
     for(;;){
         copyEach(frame,circuit2.Vin_prev, 1);
         std::cout <<frame_count<<" ";
         frame_count++;
         cap >> frame;
-        
+
         std::cout << (int)frame(peekx,peeky)[1] << " ";
         copyEach(frame,circuit2.Vin, 1);
         highPassTimeStep(circuit2,reduce);
@@ -89,7 +89,7 @@ int main(int argc, char **argv){
         copyEach(circuit2.Vout,circuit1.Vin, reduce);
         lowPassTimeStep(circuit2,reduce);
         std::cout << (int)circuit1.qVout(peekx,peeky)[1]
-                  << '/' <<circuit1.Vout(peekx,peeky)[1] 
+                  << '/' <<circuit1.Vout(peekx,peeky)[1]
                   << std::endl;
         if(frame_count %2)
         imshow("video", circuit2.qVout); if(waitKey(30) >= 0) break;
