@@ -1,9 +1,9 @@
-all: filters.o machine_learning.o
-	g++ `pkg-config --cflags opencv` machine_learning.o filters.o -O2 -o machine_learning `pkg-config --libs opencv`
-debug: filters.o machine_learning.o
-	g++ `pkg-config --cflags opencv`  machine_learning.o filters.o -O2 -o machine_learning_debug `pkg-config --libs opencv`
-machine_learning.o: machine_learning.cpp
-	g++ -c `pkg-config --cflags opencv` machine_learning.cpp -O2 
+all: filters.o band_pass.o
+	g++ `pkg-config --cflags opencv` band_pass.o filters.o -O2 -o band_pass `pkg-config --libs opencv`
+debug: filters.o band_pass.o
+	g++ `pkg-config --cflags opencv`  band_pass.o filters.o -O2 -o band_pass_debug `pkg-config --libs opencv`
+band_pass.o: band_pass.cpp
+	g++ -c `pkg-config --cflags opencv` band_pass.cpp -O2 
 filters.o: filters.cpp filters.hpp
 	g++ -c `pkg-config --cflags opencv` filters.cpp -O2 
 frame_colors:	
