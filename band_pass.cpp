@@ -1,7 +1,9 @@
-#include <cv.h>
+#include <opencv2/core/core.hpp>
 #include <stdio.h>
 #include <highgui.h>
 #include <iostream>
+
+#include <boost/filesystem.hpp>
 
 #include "filters.hpp"
 
@@ -38,6 +40,7 @@ int main(int argc, char **argv){
     int reduce = 1;
     int skip = 0;
     if(argc < 2){
+        printf("OpenCV version %s\n", CV_VERSION);
         printf("usage: machinelearning MOVIE_FILE\n");
         return -1;
     }
@@ -45,8 +48,17 @@ int main(int argc, char **argv){
         reduce = atoi(argv[2]);
     if(argc >= 4)
         skip = atoi(argv[3]);
-    VideoCapture cap;
-    cap.open(argv[1]);
+    VideoCapture cap(argv[1]);
+    if (!cap.isOpened()) {
+        std::cout << "Failed to open " << argv[1] << std::endl;
+        if (!boost::filesystem::exists(argv[1])) {
+            std::cout << "File does not exist." << std::endl;;
+        } else {
+            std::cout << "Filetype not supported, make sure that OpenCV has"
+                         " ffmpeg support." << std::endl;
+        }
+        return -1;
+    }
     Mat_<Vec3b> frame;
     Mat_<Vec3b> prev_frame;
     namedWindow("video",1);

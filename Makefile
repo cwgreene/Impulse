@@ -1,5 +1,5 @@
 all: filters.o band_pass.o
-	g++ `pkg-config --cflags opencv` band_pass.o filters.o -O2 -o band_pass `pkg-config --libs opencv`
+	g++ -std=c++11 `pkg-config --cflags opencv` band_pass.o filters.o -O2 -o band_pass `pkg-config --libs opencv` -lboost_system -lboost_filesystem
 debug: filters.o band_pass.o
 	g++ `pkg-config --cflags opencv`  band_pass.o filters.o -O2 -o band_pass_debug `pkg-config --libs opencv`
 band_pass.o: band_pass.cpp
