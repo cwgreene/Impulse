@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include <stdio.h>
-#include <highgui.h>
 #include <iostream>
 
 #include <boost/filesystem.hpp>

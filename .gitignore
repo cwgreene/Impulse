@@ -1,0 +1,6 @@
+*.o
+data
+band_pass
+CMakeFiles
+*.cmake
+CMakeCache.txt
