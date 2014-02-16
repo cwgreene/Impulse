@@ -59,6 +59,7 @@ int main(int argc, char **argv){
                             ("help", "Display this help message")
                             ("reduce", po::value<int>(&reduce)->default_value(1), "Reduction factor")
                             ("skip", po::value<int>(&skip)->default_value(0), "Frame skip")
+                            ("webcam", "Use Webcam")
                             ("input-file", "Location of movie");
 
     po::positional_options_description pd;
@@ -75,13 +76,21 @@ int main(int argc, char **argv){
         print_help(description, pd);
     }
 
-    if(!vm.count("input-file")) {
+    if(!vm.count("input-file") && !vm.count("webcam")) {
         print_help(description, pd);
     }
 
-    std::string input_file = vm["input-file"].as<std::string>();
+    std::string input_file;
+    if (!vm.count("webcam") ) {
+        input_file = vm["input-file"].as<std::string>();
+    }
 
-    VideoCapture cap(input_file);
+    VideoCapture cap;
+    if (vm.count("webcam")) {
+        cap.open(0);
+    } else {
+        cap.open(input_file);
+    }
     if (!cap.isOpened()) {
         std::cout << "Failed to open " << input_file << std::endl;
         if (!boost::filesystem::exists(input_file)) {
