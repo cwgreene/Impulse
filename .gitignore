@@ -4,3 +4,4 @@ band_pass
 CMakeFiles
 *.cmake
 CMakeCache.txt
+Makefile
