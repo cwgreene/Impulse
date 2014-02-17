@@ -82,6 +82,10 @@ int main(int argc, char **argv){
         lowPassTimeStep(circuit2,reduce);
 
         imshow("video", circuit2.qVout);
-        if (waitKey(30) >= 0) break;
+        int key = waitKey(30);
+        if (key >= 0 && key <= 255) {
+            printf("%d\n",key);
+            break;
+        }
     }
-}
+ }
