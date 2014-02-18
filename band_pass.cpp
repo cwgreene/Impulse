@@ -43,8 +43,9 @@ int main(int argc, char **argv){
     long long max_frames;
     std::string output_file;
     VideoCapture cap;
+    VideoWriter writer;
 
-    handle_options(argc, argv, frame_offset, reduce, max_frames, output_file, cap);
+    handle_options(argc, argv, frame_offset, reduce, max_frames, output_file, cap, writer);
 
     Mat_<Vec3b> frame;
     Mat_<Vec3b> prev_frame;
@@ -54,7 +55,6 @@ int main(int argc, char **argv){
     //Get first frame
     int frame_count = 0;
     cap >> frame; if(! frame.data) return -1;
-
     //Initialize voltages to correct sizes
     LowPass circuit1(frame.rows,frame.cols,0.05,10.,1.0, reduce);
     HighPass circuit2(frame.rows,frame.cols,0.05,2.0,1.0, reduce);
@@ -86,6 +86,9 @@ int main(int argc, char **argv){
         if (key >= 0 && key <= 255) {
             printf("%d\n",key);
             break;
+        }
+        if(writer.isOpened()) {
+            writer << circuit2.qVout;
         }
     }
  }

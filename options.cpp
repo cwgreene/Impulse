@@ -2,6 +2,7 @@
 
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
+#include <opencv2/highgui/highgui_c.h>
 namespace po = boost::program_options;
 
 void print_help(po::options_description &description,
@@ -21,7 +22,8 @@ void handle_options(int argc, char **argv,
                     int &reduce,
                     long long &max_frames,
                     std::string &input_file,
-                    cv::VideoCapture &cap) {
+                    cv::VideoCapture &cap,
+                    cv::VideoWriter &writer) {
     po::options_description description;
     std::string output_file;
     description.add_options()
@@ -29,7 +31,7 @@ void handle_options(int argc, char **argv,
         ("reduce", po::value<int>(&reduce)->default_value(1),
             "Reduction factor")
         ("frame-offset", po::value<int>(&frame_offset)->default_value(0), "Frame initial offset")
-        ("max-frames", po::value<long long>(&max_frames),
+        ("max-frames", po::value<long long>(&max_frames)->default_value(-1),
             "Maximum number of frames to process")
         ("output-file", po::value<std::string>(&output_file)->default_value(""),
             "Output file")
@@ -38,6 +40,7 @@ void handle_options(int argc, char **argv,
 
     po::positional_options_description pd;
     pd.add("input-file", 1);
+
 
     // Parse
     po::variables_map vm;
@@ -70,5 +73,22 @@ void handle_options(int argc, char **argv,
                          " ffmpeg support." << std::endl;
         }
         exit(-1);
+    }
+
+    if (output_file != "") {
+        double fps = 15; // TODO: Come up with better way of handling webcam
+        if ( !vm.count("webcam") ) {
+            fps = cap.get(cv::CAP_PROP_FPS);
+        }
+        writer.open(output_file,
+                CV_FOURCC('F','M','P','4'),
+                fps,
+                cv::Size((int) cap.get(cv::CAP_PROP_FRAME_WIDTH),
+                         (int) cap.get(cv::CAP_PROP_FRAME_HEIGHT)),
+                true);
+        if (!writer.isOpened()) {
+            std::cerr << "Failed to open " << output_file << std::endl;
+            exit(-1);
+        }
     }
 }

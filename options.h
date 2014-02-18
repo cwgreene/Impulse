@@ -8,5 +8,6 @@ void handle_options(int argc, char **argv,
                     int &reduce,
                     long long &max_frames,
                     std::string &input_file,
-                    cv::VideoCapture &cap);
+                    cv::VideoCapture &cap,
+                    cv::VideoWriter &writer);
 #endif
